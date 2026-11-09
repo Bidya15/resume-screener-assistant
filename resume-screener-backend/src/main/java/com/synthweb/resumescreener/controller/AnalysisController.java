@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -82,7 +83,7 @@ public class AnalysisController {
     }
 
     /**
-     * Update the recruitment workflow status for a candidate.
+     * Update the recruitment workflow status for a candidate (supports both PATCH and PUT).
      * Records an entry in the status_history audit log.
      */
     @PatchMapping("/{id}/status")
@@ -91,6 +92,13 @@ public class AnalysisController {
             @RequestBody StatusUpdateRequest request) {
         AnalysisResponse response = analysisService.updateStatus(id, request);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<AnalysisResponse> updateStatusPut(
+            @PathVariable("id") Long id,
+            @RequestBody StatusUpdateRequest request) {
+        return updateStatus(id, request);
     }
 
     /**
