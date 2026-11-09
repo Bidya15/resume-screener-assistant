@@ -1,17 +1,19 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FilePlus2, FolderSearch, RotateCcw, Search, SearchX } from 'lucide-react';
+import { AlertCircle, FilePlus2, FolderSearch, RotateCcw, Search, SearchX } from 'lucide-react';
 import AnalysisTable from '../components/AnalysisTable';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorMessage from '../components/common/ErrorMessage';
 import EmptyState from '../components/common/EmptyState';
 import useFetch from '../hooks/useFetch';
 import { getAnalyses, deleteAnalysis } from '../services/analysisService';
+import { useNotifications } from '../context/NotificationContext';
 
 const toNumberOrNull = (v) => (v === '' || Number.isNaN(Number(v)) ? null : Number(v));
 
 export default function AnalysisHistory() {
   const navigate = useNavigate();
+  const { addNotification } = useNotifications();
   const { data: analyses, loading, error, reload } = useFetch(getAnalyses, []);
 
   const [search, setSearch] = useState('');
@@ -25,16 +27,28 @@ export default function AnalysisHistory() {
 
   const [candidateToDelete, setCandidateToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   const handleDeleteConfirm = async () => {
     if (!candidateToDelete) return;
     setDeleting(true);
+    setDeleteError(null);
     try {
       await deleteAnalysis(candidateToDelete.id);
+      const name = candidateToDelete.candidateName && candidateToDelete.candidateName !== 'Unknown'
+        ? candidateToDelete.candidateName
+        : `Candidate #${candidateToDelete.id}`;
+      
+      addNotification({
+        title: 'Candidate Record Deleted',
+        message: `${name} was successfully removed from the database.`,
+        type: 'info',
+      });
+      
       setCandidateToDelete(null);
       reload();
     } catch (err) {
-      alert(err.message || 'Failed to delete candidate.');
+      setDeleteError(err.message || 'Failed to delete candidate record. Please try again.');
     } finally {
       setDeleting(false);
     }
@@ -241,23 +255,36 @@ export default function AnalysisHistory() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="fixed inset-0 bg-[#101329]/60 dark:bg-black/70 backdrop-blur-sm"
-            onClick={() => setCandidateToDelete(null)}
+            onClick={() => !deleting && setCandidateToDelete(null)}
           />
           <div className="relative z-10 w-full max-w-md rounded-2xl border border-red-200 dark:border-red-900 bg-white dark:bg-[#12162E] p-6 shadow-2xl space-y-4">
             <h3 className="text-base font-bold text-[#172033] dark:text-white">
               Delete Candidate Record?
             </h3>
             <p className="text-xs text-[#687386] dark:text-[#9AA3B2] leading-relaxed">
-              Are you sure you want to delete the record for{' '}
+              Are you sure you want to permanently delete the analysis for{' '}
               <strong className="text-[#172033] dark:text-white">
-                {candidateToDelete.candidateName || `ID #${candidateToDelete.id}`}
+                {candidateToDelete.candidateName && candidateToDelete.candidateName !== 'Unknown'
+                  ? candidateToDelete.candidateName
+                  : `Candidate #${candidateToDelete.id}`}
               </strong>?
               This action cannot be undone.
             </p>
+
+            {deleteError && (
+              <div className="flex items-start gap-2 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 p-3 text-xs text-red-600 dark:text-red-300">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                <span>{deleteError}</span>
+              </div>
+            )}
+
             <div className="flex justify-end gap-2.5 pt-2">
               <button
                 type="button"
-                onClick={() => setCandidateToDelete(null)}
+                onClick={() => {
+                  setCandidateToDelete(null);
+                  setDeleteError(null);
+                }}
                 className="btn-secondary text-xs"
                 disabled={deleting}
               >

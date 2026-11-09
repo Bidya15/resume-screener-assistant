@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Sparkles, Trash2, X } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, Sparkles, Trash2, X } from 'lucide-react';
 import useFetch from '../hooks/useFetch';
 import { getAnalysisById, deleteAnalysis } from '../services/analysisService';
+import { useNotifications } from '../context/NotificationContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorMessage from '../components/common/ErrorMessage';
 import CandidateProfileCard from '../components/results/CandidateProfileCard';
@@ -29,9 +30,11 @@ export default function AnalysisResults() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
+  const { addNotification } = useNotifications();
   const [showSuccess, setShowSuccess] = useState(Boolean(state?.justCreated));
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   // Modal states
   const [resumeModalOpen, setResumeModalOpen] = useState(false);
@@ -46,13 +49,18 @@ export default function AnalysisResults() {
 
   const handleDelete = async () => {
     setDeleting(true);
+    setDeleteError(null);
     try {
       await deleteAnalysis(id);
+      addNotification({
+        title: 'Candidate Analysis Deleted',
+        message: `Evaluation for ${analysis?.candidateName || `ID #${id}`} was removed.`,
+        type: 'info',
+      });
       navigate('/analysis/history', { replace: true });
     } catch (err) {
-      alert(err.message || 'Failed to delete candidate analysis.');
+      setDeleteError(err.message || 'Failed to delete candidate analysis. Please try again.');
       setDeleting(false);
-      setShowDeleteConfirm(false);
     }
   };
 
@@ -138,7 +146,7 @@ export default function AnalysisResults() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="fixed inset-0 bg-[#101329]/60 dark:bg-black/70 backdrop-blur-sm"
-            onClick={() => setShowDeleteConfirm(false)}
+            onClick={() => !deleting && setShowDeleteConfirm(false)}
           />
           <div className="relative z-10 w-full max-w-md rounded-2xl border border-red-200 dark:border-red-900 bg-white dark:bg-[#12162E] p-6 shadow-2xl space-y-4">
             <h3 className="text-base font-bold text-[#172033] dark:text-white">
@@ -146,13 +154,28 @@ export default function AnalysisResults() {
             </h3>
             <p className="text-xs text-[#687386] dark:text-[#9AA3B2] leading-relaxed">
               Are you sure you want to delete the screening record for{' '}
-              <strong className="text-[#172033] dark:text-white">{analysis.candidateName}</strong>?
+              <strong className="text-[#172033] dark:text-white">
+                {analysis?.candidateName && analysis.candidateName !== 'Unknown'
+                  ? analysis.candidateName
+                  : `Candidate #${id}`}
+              </strong>?
               This will permanently remove the match score, resume evaluation, and status history.
             </p>
+
+            {deleteError && (
+              <div className="flex items-start gap-2 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 p-3 text-xs text-red-600 dark:text-red-300">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                <span>{deleteError}</span>
+              </div>
+            )}
+
             <div className="flex justify-end gap-2.5 pt-2">
               <button
                 type="button"
-                onClick={() => setShowDeleteConfirm(false)}
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteError(null);
+                }}
                 className="btn-secondary text-xs"
                 disabled={deleting}
               >

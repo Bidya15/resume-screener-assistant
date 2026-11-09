@@ -70,9 +70,11 @@ export default function AnalysisTable({ analyses, sort, onSort, onView, onDelete
         <tbody className="divide-y divide-[#E8EAF1] dark:divide-[#1E2448] bg-white dark:bg-[#12162E]">
           {analyses.map((a) => {
             const tier = getScoreTier(a.matchScore);
-            const initials = a.candidateName
-              ? a.candidateName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
-              : 'CA';
+            const hasName = a.candidateName && a.candidateName.trim() !== '' && a.candidateName.toLowerCase() !== 'unknown';
+            const displayName = hasName ? a.candidateName.trim() : `Candidate #${a.id}`;
+            const initials = hasName
+              ? a.candidateName.split(' ').filter(Boolean).map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+              : 'C' + (a.id || '');
 
             return (
               <tr
@@ -88,7 +90,7 @@ export default function AnalysisTable({ analyses, sort, onSort, onView, onDelete
                     </div>
                     <div>
                       <p className="font-bold text-[#172033] dark:text-white">
-                        {a.candidateName || 'Unknown Candidate'}
+                        {displayName}
                       </p>
                       <p className="text-[11px] text-[#9AA3B2]">ID #{a.id}</p>
                     </div>
