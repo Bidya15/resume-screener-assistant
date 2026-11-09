@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #F7F8FC;
+    color: #172033;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+
+  .dark body {
+    background-color: #0B0D1B;
+    color: #E2E8F0;
+  }
+
+  :focus-visible {
+    outline: 2px solid #5935E8;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* HireAI Card Style: clean rounded corners, thin crisp border, subtle card shadow */
+  .card {
+    @apply bg-white dark:bg-[#12162E] border border-[#E8EAF1] dark:border-[#1E2448] rounded-2xl shadow-sm;
+    transition: background-color 200ms ease, border-color 200ms ease;
+  }
+
+  /* Button System */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    padding: 0.625rem 1rem;
+    transition: all 150ms ease-in-out;
+  }
+
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /* Primary purple action button matching HireAI screenshot */
+  .btn-primary {
+    @apply btn text-white shadow-sm;
+    background-color: #5935E8;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-color: #4926D6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(89, 53, 232, 0.25);
+  }
+
+  /* Secondary button with crisp border */
+  .btn-secondary {
+    @apply btn text-[#172033] bg-white border border-[#E8EAF1];
+  }
+  .dark .btn-secondary {
+    background-color: #161A36;
+    color: #E2E8F0;
+    border-color: #1E2448;
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background-color: #F7F8FC;
+    border-color: #D5D9E4;
+  }
+  .dark .btn-secondary:hover:not(:disabled) {
+    background-color: #1B2144;
+    border-color: #2D3567;
+  }
+
+  /* Ghost/Subtle button */
+  .btn-ghost {
+    @apply btn text-[#687386] bg-transparent;
+  }
+  .dark .btn-ghost {
+    color: #9AA3B2;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background-color: #F1F3F9;
+    color: #172033;
+  }
+  .dark .btn-ghost:hover:not(:disabled) {
+    background-color: #1B2144;
+    color: #FFFFFF;
+  }
+
+  /* Input fields */
+  .input {
+    width: 100%;
+    border-radius: 0.625rem;
+    border: 1px solid #E8EAF1;
+    background-color: #FFFFFF;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    color: #172033;
+    transition: border-color 150ms, box-shadow 150ms, background-color 200ms ease;
+  }
+  .dark .input {
+    background-color: #0E1226;
+    border-color: #1E2448;
+    color: #E2E8F0;
+  }
+
+  .input::placeholder {
+    color: #9AA3B2;
+  }
+  .dark .input::placeholder {
+    color: #5D6684;
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: #5935E8;
+    box-shadow: 0 0 0 3px rgba(89, 53, 232, 0.15);
+  }
+
+  /* Badges matching HireAI aesthetic */
+  .badge-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    background-color: #EBFBF3;
+    color: #16A36A;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.125rem 0.625rem;
+  }
+
+  .badge-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    background-color: #F0EDFF;
+    color: #5935E8;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.125rem 0.625rem;
+  }
+
+  .badge-warning {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    background-color: #FEF7EC;
+    color: #E6A23C;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.125rem 0.625rem;
+  }
+}
+
+/* Circular ring progress animation */
+@keyframes ring-fill {
+  from {
+    stroke-dashoffset: var(--ring-circ, 339.292);
+  }
+}
+
+.ring-progress {
+  animation: ring-fill 1000ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring-progress {
+    animation: none;
+  }
+}

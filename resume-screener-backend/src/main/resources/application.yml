@@ -1,0 +1,69 @@
+spring:
+  application:
+    name: resume-screener
+
+  datasource:
+    # Configured via environment variables with developer-friendly local defaults.
+    # For custom environments, override DB_URL, DB_USERNAME, and DB_PASSWORD.
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/resume_screener_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+
+    # HikariCP connection pool tuning
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+      connection-timeout: 20000 # 20 seconds timeout to obtain connection
+      idle-timeout: 300000      # 5 minutes idle timeout
+      max-lifetime: 1200000     # 20 minutes maximum connection lifetime
+
+  jpa:
+    open-in-view: false         # Disables Open EntityManager in View for best performance
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+    show-sql: ${JPA_SHOW_SQL:false}
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false # Emits ISO-8601 UTC dates (e.g., 2026-11-09T14:00:00Z)
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never      # Centralized GlobalExceptionHandler manages all error schemas
+    include-stacktrace: never
+
+# Groq LLM API Configuration
+groq:
+  api-key: ${GROQ_API_KEY:}
+  model: ${GROQ_MODEL:openai/gpt-oss-120b}
+  api-url: ${GROQ_API_URL:https://api.groq.com/openai/v1/chat/completions}
+  connect-timeout-seconds: ${GROQ_CONNECT_TIMEOUT:10}
+  read-timeout-seconds: ${GROQ_READ_TIMEOUT:45}
+  max-retries: ${GROQ_MAX_RETRIES:3}
+  initial-backoff-ms: ${GROQ_INITIAL_BACKOFF_MS:1000}
+
+# Gemini Configuration
+gemini:
+  api-url: ${GEMINI_API_URL:https://generativelanguage.googleapis.com/v1beta/models}
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:}
+
+# Default AI Provider
+ai:
+  provider: ${AI_PROVIDER:GROQ}
+  fallback-enabled: ${AI_FALLBACK_ENABLED:false}
+
+
+logging:
+  level:
+    com.synthweb.resumescreener: ${LOG_LEVEL:INFO}
+    org.hibernate.SQL: ${HIBERNATE_LOG_LEVEL:INFO}
