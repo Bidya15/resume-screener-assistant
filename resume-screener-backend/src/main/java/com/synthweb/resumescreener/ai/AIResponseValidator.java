@@ -211,19 +211,14 @@ public class AIResponseValidator {
         String p = path(parent, "gapType");
         JsonNode node = el.get("gapType");
         if (node == null || node.isNull()) {
-            problems.add(p + " is required.");
-            return null;
+            return GapType.MISSING_SKILL.value();
         }
         if (!node.isTextual()) {
-            problems.add(p + " must be a string.");
-            return null;
+            return GapType.MISSING_SKILL.value();
         }
         return GapType.parse(node.asText())
                 .map(GapType::value)
-                .orElseGet(() -> {
-                    problems.add(p + " must be one of " + GapType.allValues() + ".");
-                    return null;
-                });
+                .orElse(GapType.MISSING_SKILL.value());
     }
 
     private static <T> List<T> array(JsonNode root, String field, int min, int max, List<String> problems,
@@ -237,14 +232,15 @@ public class AIResponseValidator {
             problems.add(field + " must be an array.");
             return List.of();
         }
-        if (node.size() > max || node.size() < min) {
+        if (node.size() < min) {
             problems.add(min == max
-                    ? field + " must contain exactly " + max + " items."
-                    : field + " must contain at most " + max + " items.");
+                    ? field + " must contain at least " + min + " items."
+                    : field + " must contain at least " + min + " items.");
             return List.of();
         }
-        List<T> out = new ArrayList<>(node.size());
-        for (int i = 0; i < node.size(); i++) {
+        int effectiveCount = Math.min(node.size(), max);
+        List<T> out = new ArrayList<>(effectiveCount);
+        for (int i = 0; i < effectiveCount; i++) {
             JsonNode element = node.get(i);
             String elementPath = field + "[" + i + "]";
             if (!element.isObject()) {
