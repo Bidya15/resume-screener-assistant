@@ -275,3 +275,4 @@ resume-screener-assistant/
     │   └── utils/                 # File parsers (PDF, DOCX) and formatters
     └── package.json
 ```
+

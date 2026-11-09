@@ -168,3 +168,4 @@ Using AI as a pair-programming partner allowed us to rapidly build a full-stack,
 1. **Never trust AI output blindly**: Strong typing, server-side validation, and defensive programming (such as schema validators and entity sanitation) are essential when integrating non-deterministic LLMs into deterministic software.
 2. **Defensive Prompting is Essential**: Untrusted user input must always be explicitly delimited to safeguard against prompt injection attacks.
 3. **Iterative Feedback Loops Work**: Adding an automated correction prompt loop turned a 90% first-pass schema accuracy into near-100% reliability.
+
