@@ -8,9 +8,31 @@ import { extractResumeMetadata } from '../../utils/resumeParser';
  * Falls back to client-side parsing (resumeParser) only for older records that pre-date
  * the backend contact-extraction feature.
  */
+function StatusBadge({ status }) {
+  const styles = {
+    NEW:          'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
+    SHORTLISTED:  'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+    UNDER_REVIEW: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+    NOT_SUITABLE: 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300 border-red-200 dark:border-red-800',
+  };
+  const labels = {
+    NEW:          'New',
+    SHORTLISTED:  'Shortlisted',
+    UNDER_REVIEW: 'Under Review',
+    NOT_SUITABLE: 'Not Suitable',
+  };
+  const s = status || 'NEW';
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${styles[s] || styles.NEW}`}>
+      {labels[s] || s}
+    </span>
+  );
+}
+
 export default function CandidateProfileCard({
   candidateName,
   resumeText,
+  recruitmentStatus,
   // Backend-extracted contact info (nullable — null for older records)
   candidateEmail,
   candidatePhone,
@@ -62,10 +84,13 @@ export default function CandidateProfileCard({
           </div>
         </div>
 
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#EBFBF3] dark:bg-[#0E2D1F] px-2.5 py-1 text-[11px] font-semibold text-[#16A36A] shrink-0">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#16A36A]" />
-          AI Parsed
-        </span>
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
+          <StatusBadge status={recruitmentStatus} />
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#EBFBF3] dark:bg-[#0E2D1F] px-2 py-0.5 text-[10px] font-semibold text-[#16A36A]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#16A36A]" />
+            AI Parsed
+          </span>
+        </div>
       </div>
 
       {/* Contact & Social Links List */}

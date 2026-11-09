@@ -8,7 +8,7 @@ import api from './api';
  * @param {string} candidateName - Used to build the suggested filename
  */
 export async function downloadPdfReport(analysisId, candidateName) {
-  const response = await api.get(`/analyses/${analysisId}/export/pdf`, {
+  const response = await api.get(`/api/analyses/${analysisId}/export/pdf`, {
     responseType: 'blob', // Important: receive binary PDF data
   });
 

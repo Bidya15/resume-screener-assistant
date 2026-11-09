@@ -35,6 +35,7 @@ export default function AnalysisResults() {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [statusOverride, setStatusOverride] = useState(null);
 
   // Modal states
   const [resumeModalOpen, setResumeModalOpen] = useState(false);
@@ -65,8 +66,11 @@ export default function AnalysisResults() {
   };
 
   // Called when RecruitmentActionsPanel successfully updates status
-  // We update the local analysis state so the UI reflects the new status immediately
+  // We update the local analysis state so the UI reflects the new status immediately in real time
   const handleStatusChange = useCallback((updatedAnalysis) => {
+    if (updatedAnalysis?.recruitmentStatus) {
+      setStatusOverride(updatedAnalysis.recruitmentStatus);
+    }
     reload(); // Re-fetch to get the authoritative state from the backend
   }, [reload]);
 
@@ -219,10 +223,11 @@ export default function AnalysisResults() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN: Candidate, Job Description, Matching Details */}
         <div className="lg:col-span-3 space-y-6">
-          {/* CandidateProfileCard receives backend-extracted contact info */}
+          {/* CandidateProfileCard receives backend-extracted contact info and live status */}
           <CandidateProfileCard
             candidateName={analysis.candidateName}
             resumeText={analysis.resumeText}
+            recruitmentStatus={statusOverride || analysis.recruitmentStatus}
             candidateEmail={analysis.candidateEmail}
             candidatePhone={analysis.candidatePhone}
             candidateLocation={analysis.candidateLocation}
@@ -285,7 +290,7 @@ export default function AnalysisResults() {
         overallAssessment={analysis.overallAssessment}
         candidateName={analysis.candidateName}
         analysisId={analysis.id}
-        recruitmentStatus={analysis.recruitmentStatus}
+        recruitmentStatus={statusOverride || analysis.recruitmentStatus}
         onStatusChange={handleStatusChange}
       />
 

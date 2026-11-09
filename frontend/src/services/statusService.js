@@ -9,7 +9,7 @@ import api from './api';
  * @returns {Promise<object>} Updated AnalysisResponse
  */
 export async function updateRecruitmentStatus(analysisId, status, reason = null) {
-  const response = await api.patch(`/analyses/${analysisId}/status`, {
+  const response = await api.patch(`/api/analyses/${analysisId}/status`, {
     status,
     reason: reason || null,
   });
@@ -23,7 +23,7 @@ export async function updateRecruitmentStatus(analysisId, status, reason = null)
  * @returns {Promise<Array>} Array of StatusHistoryDTO objects
  */
 export async function getStatusHistory(analysisId) {
-  const response = await api.get(`/analyses/${analysisId}/status-history`);
+  const response = await api.get(`/api/analyses/${analysisId}/status-history`);
   return response.data;
 }
 
