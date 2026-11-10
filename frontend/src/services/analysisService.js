@@ -17,7 +17,7 @@ async function request(fn) {
 
 export function createAnalysis(payload) {
   return request(async () => {
-    const candidateName = payload.candidateName?.trim() || undefined;
+    const candidateName = payload.candidateName?.trim() || 'Unknown Candidate';
     const jobDescription = (payload.jobDescription || '').trim();
     const resumeText = (payload.resumeText || payload.resume || '').trim();
 

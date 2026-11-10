@@ -145,9 +145,9 @@ export default function AnalysisForm({ onSubmit, submitting }) {
 
     inFlight.current = true;
     try {
-      const detectedName = values.candidateName.trim() || extractNameFromResumeText(values.resume) || '';
+      const detectedName = values.candidateName.trim() || extractNameFromResumeText(values.resume) || 'Unknown Candidate';
       await onSubmit({
-        candidateName: detectedName || undefined,
+        candidateName: detectedName,
         jobDescription: values.jobDescription.trim(),
         resumeText: values.resume.trim(),
         resumeFileData: values.resumeFileData || undefined,

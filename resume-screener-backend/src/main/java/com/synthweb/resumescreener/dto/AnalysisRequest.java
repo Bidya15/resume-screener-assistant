@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 /** Body of POST /api/analyses. */
 public record AnalysisRequest(
 
+        @NotBlank(message = "candidateName is required")
         @Size(max = 255, message = "candidateName must be at most 255 characters")
         @NoNullCharacters
         String candidateName,

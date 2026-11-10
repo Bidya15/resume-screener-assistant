@@ -2,7 +2,7 @@
 # Uses an isolated test database so integration tests never touch dev/prod data.
 spring:
   datasource:
-    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/resume_screener_test_db}
+    url: ${TEST_DB_URL:${DB_URL:jdbc:postgresql://localhost:5432/resume_screener_test_db}}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:password}
   jpa:
