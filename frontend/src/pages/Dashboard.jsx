@@ -33,7 +33,7 @@ export default function Dashboard() {
               <span>AI Recruitment Platform</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[#172033] dark:text-white">
-              Welcome to Synthweb AI
+              Welcome to ResumeIQ
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-[#687386] dark:text-[#9AA3B2]">
               Evaluate candidate resumes intelligently and make evidence-based recruitment decisions.

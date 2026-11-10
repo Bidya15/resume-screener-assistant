@@ -10,7 +10,7 @@ import { guessCandidateNameFromFilename, extractNameFromResumeText } from '../ut
 const SAMPLE_DATA = {
   candidateName: 'Alex Morgan',
   jobDescription: `Senior Full Stack Java Engineer
-Synthweb AI Platform Team
+ResumeIQ Platform Team
 
 Key Responsibilities:
 - Design and build scalable RESTful microservices using Java 21 and Spring Boot 3.x.

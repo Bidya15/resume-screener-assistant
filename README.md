@@ -1,5 +1,4 @@
-# Resume Screener Assistant
-> **Synthweb | AI Product Engineer Assessment**  
+# ResumeIQ — AI Resume Screener Assistant
 > A production-grade, AI-assisted candidate evaluation platform built with **Spring Boot 3 (Java 21)**, **React 18 (Vite + Tailwind CSS)**, **PostgreSQL (JSONB)**, and **Multi-Provider LLM Integration (Groq & Google Gemini)**.
 
 ---
@@ -22,7 +21,7 @@
 
 ## 1. Executive Summary & Architecture Overview
 
-The **Resume Screener Assistant** is an internal HR tool designed for Synthweb recruiters. It accelerates talent screening by analyzing resumes against job descriptions, producing:
+The **ResumeIQ** platform is an internal AI recruitment assistant. It accelerates talent screening by analyzing resumes against job descriptions, producing:
 - An evidence-backed **Match Score (0–100)**
 - **Top 5 Matching Skills** (with concrete resume evidence)
 - **Top 3 Skill Gaps** (with severity level & justification)

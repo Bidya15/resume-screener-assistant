@@ -73,19 +73,21 @@ export default function Sidebar({
         <div className="flex items-center gap-3">
           {/* Logo badge */}
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5935E8] text-white shadow-md shadow-indigo-900/30">
-            <span className="text-xl font-black tracking-wider">S</span>
+            <span className="text-xl font-black tracking-wider">R</span>
           </div>
 
           {!isCollapsed && (
             <div className="overflow-hidden transition-all duration-200">
               <div className="flex items-center gap-1.5">
-                <span className="text-base font-bold text-white tracking-tight">Synthweb</span>
+                <span className="text-base font-black text-white tracking-tight">
+                  Resume<span className="text-[#A58EFF]">IQ</span>
+                </span>
                 <span className="rounded bg-[#5935E8]/20 px-1 py-0.5 text-[10px] font-bold text-[#A58EFF]">
                   AI
                 </span>
               </div>
               <p className="text-[11px] font-medium text-[#687386] truncate">
-                Resume Screener
+                AI Talent Screener
               </p>
             </div>
           )}

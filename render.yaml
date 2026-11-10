@@ -64,3 +64,4 @@ services:
           type: web
           name: resume-screener-backend
           property: host
+

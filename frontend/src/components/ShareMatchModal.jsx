@@ -44,7 +44,7 @@ export default function ShareMatchModal({
     }
   };
 
-  const formattedSummaryText = `🎯 Synthweb AI Candidate Screening Report
+  const formattedSummaryText = `🎯 ResumeIQ Candidate Screening Report
 Candidate: ${candidateName}
 Match Score: ${matchScore}%
 AI Assessment: ${overallAssessment ? overallAssessment.slice(0, 180) + '...' : 'Strong alignment with job requirements.'}
@@ -64,7 +64,7 @@ Full Report: ${currentUrl}`;
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Synthweb AI Match: ${candidateName}`,
+          title: `ResumeIQ Match: ${candidateName}`,
           text: `Review AI candidate screening for ${candidateName} (Match Score: ${matchScore}%)`,
           url: currentUrl,
         });
@@ -78,7 +78,7 @@ Full Report: ${currentUrl}`;
 
   const mailtoSubject = encodeURIComponent(`Candidate Screening Evaluation: ${candidateName} (${matchScore}%)`);
   const mailtoBody = encodeURIComponent(
-    `Hi Team,\n\nPlease review the AI screening analysis for candidate ${candidateName}.\n\nOverall Match Score: ${matchScore}%\nReview the full match breakdown here: ${currentUrl}\n\nBest regards,\nSynthweb AI Screener`
+    `Hi Team,\n\nPlease review the AI screening analysis for candidate ${candidateName}.\n\nOverall Match Score: ${matchScore}%\nReview the full match breakdown here: ${currentUrl}\n\nBest regards,\nResumeIQ Screener`
   );
 
   return (
