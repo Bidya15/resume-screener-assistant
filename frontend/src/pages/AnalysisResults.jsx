@@ -300,6 +300,8 @@ export default function AnalysisResults() {
         onClose={() => setResumeModalOpen(false)}
         title={`Original Resume — ${analysis.candidateName}`}
         content={analysis.resumeText}
+        fileData={analysis.resumeFileData}
+        fileName={analysis.resumeFileName}
       />
 
       <TextModal
@@ -307,6 +309,8 @@ export default function AnalysisResults() {
         onClose={() => setJdModalOpen(false)}
         title="Original Job Description"
         content={analysis.jobDescription}
+        fileData={analysis.jobDescriptionFileData}
+        fileName={analysis.jobDescriptionFileName}
       />
 
       <ShareMatchModal

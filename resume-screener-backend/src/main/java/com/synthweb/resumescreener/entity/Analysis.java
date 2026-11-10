@@ -95,6 +95,20 @@ public class Analysis {
     @Column(name = "resume_text", nullable = false, columnDefinition = "text")
     private String resumeText;
 
+    /** Base64 data URL of the original resume file (PDF/DOCX), if uploaded. */
+    @Column(name = "resume_file_data", columnDefinition = "text")
+    private String resumeFileData;
+
+    @Column(name = "resume_file_name")
+    private String resumeFileName;
+
+    /** Base64 data URL of the original job description file, if uploaded. */
+    @Column(name = "job_description_file_data", columnDefinition = "text")
+    private String jobDescriptionFileData;
+
+    @Column(name = "job_description_file_name")
+    private String jobDescriptionFileName;
+
     /** 0-100. Nullable only until the AI result is attached. */
     @Column(name = "match_score")
     private Integer matchScore;

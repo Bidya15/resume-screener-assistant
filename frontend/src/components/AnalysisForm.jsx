@@ -55,31 +55,58 @@ Bachelor of Science in Computer Science — State University (2018)`,
 };
 
 export default function AnalysisForm({ onSubmit, submitting }) {
-  const [values, setValues] = useState({ candidateName: '', jobDescription: '', resume: '' });
+  const [values, setValues] = useState({
+    candidateName: '',
+    jobDescription: '',
+    resume: '',
+    resumeFileData: null,
+    resumeFileName: null,
+    jdFileData: null,
+    jdFileName: null,
+  });
   const [errors, setErrors] = useState({});
   const inFlight = useRef(false);
 
   const setField = (name) => (v) => {
-    setValues((prev) => ({ ...prev, [name]: v }));
+    setValues((prev) => {
+      const next = { ...prev, [name]: v };
+      // If user pasted or typed into resume and candidateName is empty, auto-extract name from text
+      if (name === 'resume' && !prev.candidateName.trim() && v && v.trim()) {
+        const extracted = extractNameFromResumeText(v);
+        if (extracted) {
+          next.candidateName = extracted;
+        }
+      }
+      return next;
+    });
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const handleResumeFileLoaded = (fileResult) => {
-    // If candidate name field is empty, try to auto-fill it:
-    // 1. Try filename first (e.g. "John_Doe_Resume.pdf" -> "John Doe")
-    // 2. Fallback to extracting name from resume text content
-    if (!values.candidateName.trim()) {
-      let guessed = '';
-      if (fileResult.fileName) {
-        guessed = guessCandidateNameFromFilename(fileResult.fileName);
-      }
-      if (!guessed && fileResult.text) {
-        guessed = extractNameFromResumeText(fileResult.text);
-      }
-      if (guessed) {
-        setValues((prev) => ({ ...prev, candidateName: guessed }));
-      }
+    // 1. Try extracting candidate name from resume text content first
+    let guessed = '';
+    if (fileResult.text) {
+      guessed = extractNameFromResumeText(fileResult.text);
     }
+    // 2. Fallback to filename if text extraction returned empty
+    if (!guessed && fileResult.fileName) {
+      guessed = guessCandidateNameFromFilename(fileResult.fileName);
+    }
+
+    setValues((prev) => ({
+      ...prev,
+      candidateName: prev.candidateName.trim() ? prev.candidateName : (guessed || ''),
+      resumeFileData: fileResult.dataUrl || prev.resumeFileData,
+      resumeFileName: fileResult.fileName || prev.resumeFileName,
+    }));
+  };
+
+  const handleJdFileLoaded = (fileResult) => {
+    setValues((prev) => ({
+      ...prev,
+      jdFileData: fileResult.dataUrl || prev.jdFileData,
+      jdFileName: fileResult.fileName || prev.jdFileName,
+    }));
   };
 
   const loadSampleData = () => {
@@ -87,12 +114,24 @@ export default function AnalysisForm({ onSubmit, submitting }) {
       candidateName: SAMPLE_DATA.candidateName,
       jobDescription: SAMPLE_DATA.jobDescription,
       resume: SAMPLE_DATA.resume,
+      resumeFileData: null,
+      resumeFileName: null,
+      jdFileData: null,
+      jdFileName: null,
     });
     setErrors({});
   };
 
   const clearAll = () => {
-    setValues({ candidateName: '', jobDescription: '', resume: '' });
+    setValues({
+      candidateName: '',
+      jobDescription: '',
+      resume: '',
+      resumeFileData: null,
+      resumeFileName: null,
+      jdFileData: null,
+      jdFileName: null,
+    });
     setErrors({});
   };
 
@@ -106,7 +145,16 @@ export default function AnalysisForm({ onSubmit, submitting }) {
 
     inFlight.current = true;
     try {
-      await onSubmit(values);
+      const detectedName = values.candidateName.trim() || extractNameFromResumeText(values.resume) || '';
+      await onSubmit({
+        candidateName: detectedName || undefined,
+        jobDescription: values.jobDescription.trim(),
+        resumeText: values.resume.trim(),
+        resumeFileData: values.resumeFileData || undefined,
+        resumeFileName: values.resumeFileName || undefined,
+        jobDescriptionFileData: values.jdFileData || undefined,
+        jobDescriptionFileName: values.jdFileName || undefined,
+      });
     } finally {
       inFlight.current = false;
     }
@@ -175,6 +223,7 @@ export default function AnalysisForm({ onSubmit, submitting }) {
           label="Job Description"
           value={values.jobDescription}
           onChange={setField('jobDescription')}
+          onFileLoaded={handleJdFileLoaded}
           max={LIMITS.JOB_DESCRIPTION_MAX}
           error={errors.jobDescription}
           disabled={submitting}

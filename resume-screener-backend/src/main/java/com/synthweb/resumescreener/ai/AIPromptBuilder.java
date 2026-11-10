@@ -53,9 +53,9 @@ public class AIPromptBuilder {
             - You assess fit only. Do not decide, recommend or imply whether the candidate should be hired, rejected, shortlisted or interviewed.
             - Do not invent experience. If the resume does not show something, say there is no evidence of it.
 
-            CONTACT EXTRACTION
-            Extract the following fields from the resume text if explicitly stated. Set to null if not found. \
-            Never invent or guess contact information.
+            CANDIDATE INFORMATION AND CONTACT EXTRACTION
+            Extract the following fields from the resume text if explicitly stated. Never invent or guess.
+            - candidateName: The candidate's full personal or professional name stated at the top or header of the resume (e.g. "Jane Doe"). Set to "Unknown" ONLY if no name is stated in the resume.
             - candidateEmail: a valid email address (e.g. john@example.com). null if not found.
             - candidatePhone: a phone number as written in the resume. null if not found.
             - candidateLocation: city, state, country, or any location stated. null if not found.

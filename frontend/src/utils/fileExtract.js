@@ -1,4 +1,4 @@
-﻿import * as pdfjsLib from 'pdfjs-dist';
+import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.js?url';
 import mammoth from 'mammoth';
 
@@ -6,10 +6,28 @@ import mammoth from 'mammoth';
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 /**
- * Extract plain text from an uploaded File object (.txt, .md, .pdf, .docx).
+ * Read a browser File object as a base64 Data URL.
  *
  * @param {File} file
- * @returns {Promise<{ text: string, fileName: string, fileSize: number, fileType: string }>}
+ * @returns {Promise<string|null>}
+ */
+export function readFileAsDataUrl(file) {
+  return new Promise((resolve) => {
+    if (!file) return resolve(null);
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Extract plain text and Data URL from an uploaded File object (.txt, .md, .pdf, .docx).
+ * Preserves structural visual line breaks so headings, contact details, and bullet points
+ * are not smashed into a single line.
+ *
+ * @param {File} file
+ * @returns {Promise<{ text: string, fileName: string, fileSize: number, fileType: string, dataUrl: string|null }>}
  */
 export async function extractTextFromFile(file) {
   if (!file) throw new Error('No file provided');
@@ -23,10 +41,13 @@ export async function extractTextFromFile(file) {
     throw new Error(`File is too large (${(fileSize / (1024 * 1024)).toFixed(1)} MB). Maximum allowed size is 10 MB.`);
   }
 
+  // Pre-fetch Data URL for exact document viewing
+  const dataUrl = await readFileAsDataUrl(file);
+
   // 1. Plain text and Markdown
   if (lowerName.endsWith('.txt') || lowerName.endsWith('.md') || lowerName.endsWith('.markdown')) {
     const raw = await file.text();
-    return { text: cleanText(raw), fileName, fileSize, fileType: 'txt' };
+    return { text: cleanText(raw), fileName, fileSize, fileType: 'txt', dataUrl };
   }
 
   // 2. Microsoft Word (.docx)
@@ -38,7 +59,7 @@ export async function extractTextFromFile(file) {
       if (!text) {
         throw new Error('The DOCX file appears to be empty or contains only non-text elements (e.g. images).');
       }
-      return { text, fileName, fileSize, fileType: 'docx' };
+      return { text, fileName, fileSize, fileType: 'docx', dataUrl };
     } catch (err) {
       throw new Error(`Failed to parse DOCX file: ${err.message}`);
     }
@@ -60,15 +81,36 @@ export async function extractTextFromFile(file) {
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
-        const pageStrings = content.items.map((item) => item.str);
-        pagesText.push(pageStrings.join(' '));
+        let pageText = '';
+        let lastY = null;
+
+        for (const item of content.items) {
+          if (!item.str) continue;
+          const y = item.transform ? item.transform[5] : null;
+
+          // When vertical position changes significantly, insert a newline
+          if (lastY !== null && y !== null && Math.abs(y - lastY) > 3) {
+            pageText += '\n';
+          } else if (pageText.length > 0 && !pageText.endsWith('\n') && !pageText.endsWith(' ')) {
+            pageText += ' ';
+          }
+
+          pageText += item.str;
+
+          if (item.hasEOL) {
+            pageText += '\n';
+          }
+          lastY = y;
+        }
+
+        pagesText.push(pageText);
       }
 
       const combined = cleanText(pagesText.join('\n\n'));
       if (!combined) {
         throw new Error('The PDF appears to be scanned or contains only images without selectable text.');
       }
-      return { text: combined, fileName, fileSize, fileType: 'pdf' };
+      return { text: combined, fileName, fileSize, fileType: 'pdf', dataUrl };
     } catch (err) {
       throw new Error(`Failed to read PDF file: ${err.message}`);
     }
@@ -77,7 +119,7 @@ export async function extractTextFromFile(file) {
   // Fallback: try plain text reading
   try {
     const text = await file.text();
-    return { text: cleanText(text), fileName, fileSize, fileType: 'unknown' };
+    return { text: cleanText(text), fileName, fileSize, fileType: 'unknown', dataUrl };
   } catch (err) {
     throw new Error(`Unsupported file type (${fileName}). Please upload a .txt, .pdf, or .docx file.`);
   }
@@ -159,15 +201,16 @@ export function extractNameFromResumeText(text) {
     }
   }
 
-  // ── Strategy 2: Extract from pipe-separated contact-info line ────────────
-  // Many PDFs collapse the header into one line: "JOHN DOE | john@email.com | +91 ..."
-  // Try the first segment before a pipe to see if it is a name.
-  for (let i = 0; i < Math.min(5, lines.length); i++) {
+  // ── Strategy 2: Extract from separated header line (e.g. pipe, bullet, dash) ─
+  // Many resumes collapse the header into one line: "JOHN DOE | john@email.com | +91 ..."
+  // or "John Doe - Senior Software Engineer"
+  for (let i = 0; i < Math.min(8, lines.length); i++) {
     const line = lines[i];
-    if (!line.includes('|')) continue;
-    const firstSegment = line.split('|')[0].trim();
-    if (looksLikeName(firstSegment, headingWords)) {
-      return toTitleCase(firstSegment);
+    if (/[|•–—\-]/.test(line)) {
+      const firstSegment = line.split(/[|•–—\-]/)[0].trim();
+      if (looksLikeName(firstSegment, headingWords)) {
+        return toTitleCase(firstSegment);
+      }
     }
   }
 

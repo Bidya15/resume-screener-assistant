@@ -50,12 +50,13 @@ export default function FileOrTextInput({
         size: result.fileSize,
         chars: result.text.length,
         type: result.fileType,
+        dataUrl: result.dataUrl,
       });
 
       // Update parent value
-      onChange(result.text);
+      onChange(result.text, result);
 
-      // Notify parent (e.g., to auto-suggest candidate name from resume file)
+      // Notify parent (e.g., to auto-suggest candidate name and preserve original file)
       if (onFileLoaded) {
         onFileLoaded(result);
       }

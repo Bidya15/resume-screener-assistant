@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Maps cleanly between Analysis domain entities and REST API DTOs.
@@ -26,7 +27,7 @@ import java.util.List;
 public class AnalysisMapper {
 
     public Analysis toEntity(AnalysisRequest request, AnalysisResult result) {
-        String resolvedCandidateName = resolveCandidateName(request.candidateName(), result.candidateName());
+        String resolvedCandidateName = resolveCandidateName(request.candidateName(), result.candidateName(), request.resumeText());
 
         List<MatchingSkill> matchingSkills = result.matchingSkills() == null ? List.of() :
                 result.matchingSkills().stream()
@@ -55,6 +56,10 @@ public class AnalysisMapper {
                 .recruitmentStatus(RecruitmentStatus.NEW)
                 .jobDescription(request.jobDescription().trim())
                 .resumeText(request.resumeText().trim())
+                .resumeFileData(request.resumeFileData())
+                .resumeFileName(request.resumeFileName())
+                .jobDescriptionFileData(request.jobDescriptionFileData())
+                .jobDescriptionFileName(request.jobDescriptionFileName())
                 .matchScore(result.matchScore())
                 .overallAssessment(result.overallAssessment())
                 .matchingSkills(matchingSkills)
@@ -97,7 +102,11 @@ public class AnalysisMapper {
                 matchingSkillDTOs,
                 skillGapDTOs,
                 questionDTOs,
-                analysis.getCreatedAt()
+                analysis.getCreatedAt(),
+                analysis.getResumeFileData(),
+                analysis.getResumeFileName(),
+                analysis.getJobDescriptionFileData(),
+                analysis.getJobDescriptionFileName()
         );
     }
 
@@ -122,13 +131,64 @@ public class AnalysisMapper {
         );
     }
 
-    private String resolveCandidateName(String requestName, String aiDetectedName) {
+    private String resolveCandidateName(String requestName, String aiDetectedName, String resumeText) {
         if (StringUtils.hasText(requestName)) {
             return requestName.trim();
         }
         if (StringUtils.hasText(aiDetectedName) && !"Unknown".equalsIgnoreCase(aiDetectedName.trim())) {
             return aiDetectedName.trim();
         }
+        String fallback = extractCandidateNameFallback(resumeText);
+        if (StringUtils.hasText(fallback)) {
+            return fallback;
+        }
         return "Unknown Candidate";
+    }
+
+    private String extractCandidateNameFallback(String resumeText) {
+        if (!StringUtils.hasText(resumeText)) {
+            return null;
+        }
+        String[] lines = resumeText.split("\\R");
+        Set<String> noiseWords = Set.of(
+                "summary", "objective", "experience", "education", "skills", "projects",
+                "certifications", "achievements", "contact", "profile", "resume", "cv",
+                "curriculum", "vitae", "technical"
+        );
+        for (int i = 0; i < Math.min(10, lines.length); i++) {
+            String line = lines[i].trim();
+            if (line.isEmpty() || line.contains("@") || line.contains("http") || line.contains("www.")) {
+                continue;
+            }
+            // If separated by separator, take first part
+            String candidate = line.split("[|•–—\\-]")[0].trim();
+            String[] words = candidate.split("\\s+");
+            if (words.length >= 2 && words.length <= 4) {
+                boolean allAlpha = true;
+                boolean hasNoise = false;
+                for (String w : words) {
+                    if (!w.matches("^[A-Za-z'\\-.]+$")) {
+                        allAlpha = false;
+                        break;
+                    }
+                    if (noiseWords.contains(w.toLowerCase())) {
+                        hasNoise = true;
+                        break;
+                    }
+                }
+                if (allAlpha && !hasNoise) {
+                    StringBuilder sb = new StringBuilder();
+                    for (String w : words) {
+                        if (!sb.isEmpty()) sb.append(" ");
+                        sb.append(Character.toUpperCase(w.charAt(0)));
+                        if (w.length() > 1) {
+                            sb.append(w.substring(1).toLowerCase());
+                        }
+                    }
+                    return sb.toString();
+                }
+            }
+        }
+        return null;
     }
 }
