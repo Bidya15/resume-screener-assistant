@@ -44,12 +44,12 @@ server:
 # Groq LLM API Configuration
 groq:
   api-key: ${GROQ_API_KEY:}
-  model: ${GROQ_MODEL:openai/gpt-oss-120b}
+  model: ${GROQ_MODEL:llama-3.3-70b-versatile}
   api-url: ${GROQ_API_URL:https://api.groq.com/openai/v1/chat/completions}
   connect-timeout-seconds: ${GROQ_CONNECT_TIMEOUT:10}
   read-timeout-seconds: ${GROQ_READ_TIMEOUT:45}
   max-retries: ${GROQ_MAX_RETRIES:3}
-  initial-backoff-ms: ${GROQ_INITIAL_BACKOFF_MS:1000}
+  initial-backoff-ms: ${GROQ_INITIAL_BACKOFF_MS:2500}
 
 # Gemini Configuration
 gemini:

@@ -48,7 +48,10 @@ public class AIResponseValidator {
         JsonNode root = parse(raw);
         List<String> problems = new ArrayList<>();
 
-        String name = text(root, "candidateName", "", MAX_NAME, problems);
+        String name = optionalText(root, "candidateName", MAX_NAME, problems);
+        if (name == null || name.isBlank()) {
+            name = "Candidate";
+        }
         Integer score = score(root, problems);
         String assessment = text(root, "overallAssessment", "", MAX_ASSESSMENT, problems);
 
@@ -77,7 +80,7 @@ public class AIResponseValidator {
                     return new SkillGapDTO(skill, reason, requirement, gapType);
                 });
 
-        List<InterviewQuestionDTO> questions = array(root, "interviewQuestions", REQUIRED_QUESTIONS, REQUIRED_QUESTIONS, problems,
+        List<InterviewQuestionDTO> questions = array(root, "interviewQuestions", 1, REQUIRED_QUESTIONS, problems,
                 (el, path) -> {
                     String question = text(el, "question", path, MAX_QUESTION, problems);
                     String purpose = text(el, "purpose", path, MAX_SENTENCE, problems);
@@ -111,14 +114,20 @@ public class AIResponseValidator {
         return root;
     }
 
-    /** Models sometimes wrap JSON in ```json fences despite instructions; unwrapping is lossless. */
+    /** Models sometimes wrap JSON in ```json fences or commentary; extracting the JSON block is lossless. */
     private static String stripCodeFence(String text) {
-        if (text.startsWith("```")) {
-            int firstNewline = text.indexOf('\n');
+        int firstFence = text.indexOf("```");
+        if (firstFence >= 0) {
+            int firstNewline = text.indexOf('\n', firstFence);
             int closing = text.lastIndexOf("```");
             if (firstNewline > 0 && closing > firstNewline) {
                 return text.substring(firstNewline + 1, closing).trim();
             }
+        }
+        int firstBrace = text.indexOf('{');
+        int lastBrace = text.lastIndexOf('}');
+        if (firstBrace >= 0 && lastBrace > firstBrace) {
+            return text.substring(firstBrace, lastBrace + 1).trim();
         }
         return text;
     }
@@ -196,15 +205,11 @@ public class AIResponseValidator {
             return null;
         }
         BigDecimal value = node.decimalValue();
-        if (value.stripTrailingZeros().scale() > 0) {
-            problems.add("matchScore must be a whole number.");
-            return null;
-        }
         if (value.compareTo(BigDecimal.ZERO) < 0 || value.compareTo(BigDecimal.valueOf(100)) > 0) {
             problems.add("matchScore must be between 0 and 100.");
             return null;
         }
-        return value.intValueExact();
+        return value.setScale(0, java.math.RoundingMode.HALF_UP).intValue();
     }
 
     private static String gapType(JsonNode el, String parent, List<String> problems) {

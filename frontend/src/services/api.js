@@ -3,7 +3,7 @@ import axios from 'axios';
 // Single configured Axios instance. Every service function goes through this.
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
-  timeout: 60000, // AI analysis can be slow, so allow up to a minute
+  timeout: 90000, // 90s to comfortably tolerate cloud free-tier cold starts and LLM generation
   headers: { 'Content-Type': 'application/json' },
 });
 

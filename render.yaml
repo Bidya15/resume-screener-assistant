@@ -39,7 +39,7 @@ services:
       - key: AI_PROVIDER
         value: GROQ
       - key: GROQ_MODEL
-        value: openai/gpt-oss-120b
+        value: llama-3.3-70b-versatile
       - key: GROQ_API_KEY
         sync: false # Set securely in Render dashboard
       - key: GEMINI_API_KEY
