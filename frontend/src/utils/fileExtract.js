@@ -1,4 +1,4 @@
-import * as pdfjsLib from 'pdfjs-dist';
+﻿import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.js?url';
 import mammoth from 'mammoth';
 
@@ -119,9 +119,12 @@ export function guessCandidateNameFromFilename(fileName) {
 
 /**
  * Attempt to extract a candidate's name from the resume text content.
- * Logic:
- * 1. Look for an explicit "Name:" label in the first 25 lines.
- * 2. Scan the first 15 lines for 2–4 properly capitalized words that look like a name.
+ *
+ * Strategy order:
+ * 1. Explicit "Name:" / "Full Name:" label in the first 25 lines.
+ * 2. First 1-3 pipe-separated segments on a contact-info line (e.g. PDF single-line headers).
+ * 3. Scan the first 15 non-contact lines for 2–5 words that look like a name.
+ *
  * Returns '' if the name cannot be determined with confidence.
  *
  * @param {string} text - Plain text resume content
@@ -141,9 +144,10 @@ export function extractNameFromResumeText(text) {
     'certifications', 'achievements', 'awards', 'interests', 'hobbies',
     'languages', 'contact', 'references', 'profile', 'personal', 'work',
     'professional', 'technical', 'career', 'curriculum', 'vitae', 'resume',
+    'details', 'information',
   ]);
 
-  // Strategy 1: Explicit "Name:" label in first 25 lines
+  // ── Strategy 1: Explicit "Name:" label ───────────────────────────────────
   const labelPattern = /^(?:full\s+)?name\s*[:\-]\s*(.+)$/i;
   for (let i = 0; i < Math.min(25, lines.length); i++) {
     const match = lines[i].match(labelPattern);
@@ -155,20 +159,36 @@ export function extractNameFromResumeText(text) {
     }
   }
 
-  // Strategy 2: Standalone name in first 15 lines (before contact info / sections)
+  // ── Strategy 2: Extract from pipe-separated contact-info line ────────────
+  // Many PDFs collapse the header into one line: "JOHN DOE | john@email.com | +91 ..."
+  // Try the first segment before a pipe to see if it is a name.
+  for (let i = 0; i < Math.min(5, lines.length); i++) {
+    const line = lines[i];
+    if (!line.includes('|')) continue;
+    const firstSegment = line.split('|')[0].trim();
+    if (looksLikeName(firstSegment, headingWords)) {
+      return toTitleCase(firstSegment);
+    }
+  }
+
+  // ── Strategy 3: Standalone name in first 15 lines ────────────────────────
   const emailPattern = /[@]/;
-  const phonePattern = /[\d\-+()]{7,}/;
+  const phonePattern = /[\d]{6,}/;        // 6+ consecutive digits = likely a phone/ID
   const urlPattern   = /https?:\/\/|www\.|linkedin\.com|github\.com/i;
 
   for (let i = 0; i < Math.min(15, lines.length); i++) {
     const line = lines[i];
-    // Skip lines that contain email, phone number, or URLs
+    // Skip lines containing email, URLs, or long digit sequences
     if (emailPattern.test(line) || phonePattern.test(line) || urlPattern.test(line)) continue;
-    // Skip lines with special characters common in addresses or headers
+    // Skip lines with pipe, bullet, slash, or other structural characters
     if (/[|•\\/,@#*]/.test(line)) continue;
 
     const words = line.split(/\s+/).filter(Boolean);
     if (words.length < 2 || words.length > 5) continue;
+
+    // Skip spaced-out PDF fonts where each letter is a separate token: "J O H N  D O E"
+    if (words.every((w) => w.length === 1)) continue;
+
     if (looksLikeName(line, headingWords)) {
       return toTitleCase(line);
     }
@@ -179,23 +199,29 @@ export function extractNameFromResumeText(text) {
 
 /**
  * Returns true if the string looks like a person's name:
- * - 2–5 words, each beginning with a capital letter
- * - No digits, no headings
- * - Only contains letters, hyphens, apostrophes, and periods
+ * - 2–5 words
+ * - Each word contains only letters (including accented), hyphens, apostrophes, or periods
+ * - At least half the words start with an uppercase letter
+ * - None of the words are known section headings
  */
 function looksLikeName(str, headingWords) {
   if (!str) return false;
   const words = str.trim().split(/\s+/);
   if (words.length < 2 || words.length > 5) return false;
-  if (words.some((w) => !(/^[A-Za-z][A-Za-z'\-.]*$/.test(w)))) return false;
-  // All words must start with a capital letter (or be short connectors like 'de', 'van')
-  const isCapitalized = words.every((w) => /^[A-Z]/.test(w) || w.length <= 2);
-  if (!isCapitalized) return false;
+
+  // Allow Unicode letters (handles accented: José, García, etc.), hyphens, apostrophes, periods
+  const wordPattern = /^[\p{L}][\p{L}'\-.]*$/u;
+  if (words.some((w) => !wordPattern.test(w))) return false;
+
+  // At least majority of words must start with an uppercase letter
+  // (handles ALL-CAPS "JOHN DOE", title-case "John Doe", and mixed "JOHN doe")
+  const uppercaseCount = words.filter((w) => /^\p{Lu}/u.test(w)).length;
+  if (uppercaseCount < Math.ceil(words.length / 2)) return false;
+
   // None of the words should be a known section heading
   if (words.some((w) => headingWords.has(w.toLowerCase()))) return false;
   return true;
 }
-
 function toTitleCase(str) {
   return str
     .split(/\s+/)
