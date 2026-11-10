@@ -5,9 +5,10 @@ import { validateAnalysisInput } from '../utils/validation';
 import FileOrTextInput from './FileOrTextInput';
 import { guessCandidateNameFromFilename, extractNameFromResumeText } from '../utils/fileExtract';
 
-// Sample dataset so evaluators and users can test the full AI screening flow with 1 click
+// Sample dataset so evaluators can test the full AI screening flow with one click.
+// All details are entirely fictional and for demonstration purposes only.
 const SAMPLE_DATA = {
-  candidateName: 'Sarah Jenkins',
+  candidateName: 'Alex Morgan',
   jobDescription: `Senior Full Stack Java Engineer
 Synthweb AI Platform Team
 
@@ -16,7 +17,7 @@ Key Responsibilities:
 - Develop modern, responsive web user interfaces with React, Vite, and Tailwind CSS.
 - Architect high-performance PostgreSQL databases, write optimized JPA/Hibernate queries, and design JSONB data models.
 - Integrate Large Language Models (LLMs) and Generative AI pipelines into enterprise workflows.
-- Implement robust CI/CD, unit testing with JUnit 5/Mockito, and automated containerized deployments.
+- Implement robust CI/CD, unit testing with JUnit 5/Mockito, and automated containerised deployments.
 
 Requirements:
 - 5+ years of production experience in Java and the Spring Boot ecosystem.
@@ -25,32 +26,32 @@ Requirements:
 - Experience with Docker, cloud deployment (AWS/GCP), and secure API designs.
 - Bachelor's or Master's degree in Computer Science or equivalent work experience.`,
 
-  resume: `SARAH JENKINS
-San Francisco, CA | sarah.jenkins@example.com | github.com/sjenkins-dev
+  resume: `ALEX MORGAN
+alex.morgan@example.dev | github.com/alexmdev
 
 SUMMARY:
-Senior Software Engineer with 6 years of hands-on experience designing and delivering distributed backend systems in Java/Spring Boot and responsive frontends with React. Experienced in architecting PostgreSQL database schemas, building secure RESTful APIs, and implementing LLM-assisted features.
+Senior Software Engineer with 6 years of experience designing distributed backend systems in Java/Spring Boot and responsive frontends with React. Skilled in PostgreSQL schema design, secure RESTful APIs, and LLM-assisted feature development.
 
 TECHNICAL SKILLS:
-- Languages & Frameworks: Java 17/21, Spring Boot 3.x, Spring Data JPA, Hibernate, React, TypeScript, JavaScript (ES6+), HTML5/Tailwind CSS
-- Databases & Storage: PostgreSQL (JSONB, query optimization, indexing), Redis, Liquibase
+- Languages & Frameworks: Java 17/21, Spring Boot 3.x, Spring Data JPA, Hibernate, React, TypeScript, JavaScript (ES6+), Tailwind CSS
+- Databases & Storage: PostgreSQL (JSONB, query optimisation, indexing), Redis, Liquibase
 - Cloud & DevOps: Docker, Kubernetes, AWS (ECS, RDS, S3), GitHub Actions CI/CD
 - Testing: JUnit 5, Mockito, Testcontainers, Jest
 
 EXPERIENCE:
 Senior Backend Engineer — CloudScale Solutions (2021 – Present)
-- Engineered high-throughput Spring Boot 3 microservices handling over 15,000 requests/sec with sub-50ms latency.
+- Engineered high-throughput Spring Boot 3 microservices handling 15,000+ requests/sec at sub-50 ms latency.
 - Designed PostgreSQL schemas with JSONB caching strategies, reducing query latency by 35%.
-- Integrated OpenAI and Claude LLM APIs to automate customer ticket categorization and sentiment analysis.
-- Led the migration from Java 11 to Java 21, adopting virtual threads and record patterns.
+- Integrated OpenAI and Claude LLM APIs to automate customer ticket categorisation and sentiment analysis.
+- Led migration from Java 11 to Java 21, adopting virtual threads and record patterns.
 
 Full Stack Developer — Nexus Web Labs (2018 – 2021)
-- Developed customer-facing analytics dashboards using React, Redux, and Tailwind CSS.
-- Built Spring Boot REST APIs supporting dynamic dashboard filtering, aggregation, and export.
-- Authored comprehensive test suites with JUnit 5 and Mockito, raising code coverage from 62% to 88%.
+- Developed customer-facing analytics dashboards with React, Redux, and Tailwind CSS.
+- Built Spring Boot REST APIs supporting dynamic filtering, aggregation, and data export.
+- Raised test coverage from 62% to 88% using JUnit 5 and Mockito.
 
 EDUCATION:
-Bachelor of Science in Computer Science — University of California, Davis (2018)`,
+Bachelor of Science in Computer Science — State University (2018)`,
 };
 
 export default function AnalysisForm({ onSubmit, submitting }) {

@@ -16,15 +16,15 @@ const PROFILE_STORAGE_KEY = 'synthweb_user_profile';
 const PREFS_STORAGE_KEY = 'synthweb_user_preferences';
 
 const DEFAULT_PROFILE = {
-  fullName: 'Rohit Sharma',
-  email: 'rohit.sharma@synthweb.io',
-  phone: '+91 98765 43210',
-  role: 'Senior Technical Recruiter & HR Administrator',
-  department: 'Talent Acquisition',
-  avatarInitials: 'RS',
+  fullName: '',
+  email: '',
+  phone: '',
+  role: '',
+  department: '',
+  avatarInitials: '?',
   avatarUrl: null,
-  userId: 'USR-89214',
-  memberSince: 'March 2024',
+  userId: 'USR-00001',
+  memberSince: new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }),
   status: 'Active Administrator',
 };
 
@@ -43,7 +43,13 @@ export const profileService = {
         localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(DEFAULT_PROFILE));
         return DEFAULT_PROFILE;
       }
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      // Clear any stale dummy name that was seeded in a previous version
+      if (parsed.fullName === 'Rohit Sharma' || parsed.email === 'rohit.sharma@synthweb.io') {
+        localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(DEFAULT_PROFILE));
+        return DEFAULT_PROFILE;
+      }
+      return parsed;
     } catch {
       return DEFAULT_PROFILE;
     }

@@ -35,9 +35,9 @@ export default function Sidebar({
 }) {
   const { profile } = useProfile();
 
-  const displayName = profile?.fullName || 'Rohit Sharma';
-  const displayRole = profile?.role || 'Senior Technical Recruiter';
-  const displayInitials = profile?.avatarInitials || 'RS';
+  const displayName = profile?.fullName || 'Recruiter';
+  const displayRole = profile?.role || 'HR Team';
+  const displayInitials = profile?.avatarInitials || '?';
 
   return (
     <div

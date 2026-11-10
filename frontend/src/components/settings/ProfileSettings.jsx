@@ -96,7 +96,7 @@ export default function ProfileSettings() {
 
           <div className="text-center sm:text-left space-y-1">
             <h4 className="text-sm font-bold text-[#172033] dark:text-white">
-              {profile?.fullName || 'Rohit Sharma'}
+              {profile?.fullName || 'Your Name'}
             </h4>
             <p className="text-xs text-[#687386] dark:text-[#9AA3B2]">
               User ID: <span className="font-mono text-[11px]">{profile?.userId}</span> • {profile?.status}
@@ -125,7 +125,7 @@ export default function ProfileSettings() {
               value={formData.fullName}
               onChange={handleChange('fullName')}
               className="input w-full"
-              placeholder="e.g. Rohit Sharma"
+              placeholder="e.g. Jane Smith"
             />
           </div>
 
@@ -141,7 +141,7 @@ export default function ProfileSettings() {
               value={formData.email}
               onChange={handleChange('email')}
               className="input w-full"
-              placeholder="e.g. rohit.sharma@synthweb.io"
+              placeholder="e.g. jane.smith@company.io"
             />
           </div>
 
@@ -156,7 +156,7 @@ export default function ProfileSettings() {
               value={formData.phone}
               onChange={handleChange('phone')}
               className="input w-full"
-              placeholder="+91 98765 43210"
+              placeholder="+91 00000 00000"
             />
           </div>
 
