@@ -1,0 +1,66 @@
+databases:
+  - name: resume-screener-postgres
+    databaseName: resume_screener_db
+    user: postgres
+    plan: free
+
+services:
+  # -------------------------------------------------------------
+  # Backend: Spring Boot 3 Web Service
+  # -------------------------------------------------------------
+  - type: web
+    name: resume-screener-backend
+    runtime: docker
+    dockerfilePath: resume-screener-backend/Dockerfile
+    dockerContext: resume-screener-backend
+    plan: free
+    healthCheckPath: /api/dashboard/stats
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: resume-screener-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: resume-screener-postgres
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: resume-screener-postgres
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: resume-screener-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: resume-screener-postgres
+          property: password
+      - key: AI_PROVIDER
+        value: GROQ
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: GROQ_API_KEY
+        sync: false # Set securely in Render dashboard
+      - key: GEMINI_API_KEY
+        sync: false # Optional fallback
+
+  # -------------------------------------------------------------
+  # Frontend: React 18 (Vite) Static Site
+  # -------------------------------------------------------------
+  - type: web
+    name: resume-screener-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    plan: free
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: resume-screener-backend
+          property: host

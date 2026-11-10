@@ -4,8 +4,8 @@ spring:
 
   datasource:
     # Configured via environment variables with developer-friendly local defaults.
-    # For custom environments, override DB_URL, DB_USERNAME, and DB_PASSWORD.
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/resume_screener_db}
+    # Compatible with Render, Docker Compose, AWS RDS, and local PostgreSQL.
+    url: ${DB_URL:${JDBC_DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:resume_screener_db}}}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
@@ -36,7 +36,7 @@ spring:
       write-dates-as-timestamps: false # Emits ISO-8601 UTC dates (e.g., 2026-11-09T14:00:00Z)
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:${SERVER_PORT:8080}}
   error:
     include-message: never      # Centralized GlobalExceptionHandler manages all error schemas
     include-stacktrace: never
