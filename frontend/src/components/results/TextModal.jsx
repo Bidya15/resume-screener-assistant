@@ -6,7 +6,7 @@ import { Check, Copy, Download, Eye, FileCode, FileText, X } from 'lucide-react'
  * Supports:
  * - Direct PDF preview via embedded viewer when original PDF data is available
  * - Formatted document view with preserved visual line breaks & headings
- * - Copy to clipboard & download file capabilities
+ * - Download in exact uploaded format (.pdf / .docx) — never raw .txt
  */
 export default function TextModal({
   isOpen,
@@ -17,8 +17,13 @@ export default function TextModal({
   fileName,
 }) {
   const isPdf = Boolean(
-    (fileData && typeof fileData === 'string' && fileData.startsWith('data:application/pdf')) ||
+    (fileData && typeof fileData === 'string' && (fileData.startsWith('data:application/pdf') || fileData.includes('pdf'))) ||
     (fileName && fileName.toLowerCase().endsWith('.pdf'))
+  );
+
+  const isDocx = Boolean(
+    (fileData && typeof fileData === 'string' && (fileData.includes('wordprocessingml') || fileData.includes('msword'))) ||
+    (fileName && (fileName.toLowerCase().endsWith('.docx') || fileName.toLowerCase().endsWith('.doc')))
   );
 
   const [activeTab, setActiveTab] = useState(isPdf && fileData ? 'pdf' : 'text');
@@ -34,25 +39,46 @@ export default function TextModal({
 
   const handleDownload = () => {
     if (fileData) {
+      // 1. Exact uploaded binary file (.pdf / .docx)
       const link = document.createElement('a');
       link.href = fileData;
-      link.download = fileName || (isPdf ? 'document.pdf' : 'document.txt');
+      link.download = fileName || (isPdf ? `${title}.pdf` : isDocx ? `${title}.docx` : `${title}.pdf`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } else {
-      // Download extracted text as .txt file
-      const blob = new Blob([content || ''], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName ? `${fileName.replace(/\.[^/.]+$/, '')}.txt` : 'document.txt';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // 2. Open print window to save as styled PDF document
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>${title}</title>
+              <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
+                h1 { font-size: 20px; font-weight: 800; border-bottom: 2px solid #5935e8; padding-bottom: 10px; margin-bottom: 20px; color: #172033; }
+                pre { font-family: inherit; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; }
+                @media print { body { padding: 0; } }
+              </style>
+            </head>
+            <body>
+              <h1>${title}</h1>
+              <pre>${(content || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+              <script>
+                window.onload = function() {
+                  window.print();
+                };
+              </script>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      }
     }
   };
+
+  const downloadLabel = isPdf ? 'Download PDF' : isDocx ? 'Download DOCX' : 'Export PDF';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5">
@@ -77,7 +103,7 @@ export default function TextModal({
               </h3>
               {fileName && (
                 <p className="text-xs text-[#687386] dark:text-[#9AA3B2] truncate">
-                  Original file: <span className="font-medium text-[#5935E8] dark:text-[#A58EFF]">{fileName}</span>
+                  Uploaded file: <span className="font-medium text-[#5935E8] dark:text-[#A58EFF]">{fileName}</span>
                 </p>
               )}
             </div>
@@ -118,11 +144,11 @@ export default function TextModal({
             <button
               type="button"
               onClick={handleDownload}
-              className="btn-secondary text-xs py-1.5 px-3"
-              title="Download original file"
+              className="btn-primary text-xs py-1.5 px-3"
+              title="Download original document"
             >
               <Download className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Download</span>
+              <span>{downloadLabel}</span>
             </button>
 
             <button
@@ -169,6 +195,23 @@ export default function TextModal({
           ) : (
             /* FORMATTED DOCUMENT TEXT VIEW */
             <div className="h-[68vh] overflow-y-auto rounded-xl border border-[#E8EAF1] dark:border-[#1E2448] bg-white dark:bg-[#0E1226] p-5 sm:p-7 shadow-inner">
+              {isDocx && fileName && (
+                <div className="mb-4 flex items-center justify-between rounded-lg bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 p-3 text-xs">
+                  <div className="flex items-center gap-2 text-[#5935E8] dark:text-[#A58EFF] font-semibold">
+                    <FileText className="h-4 w-4" />
+                    <span>Uploaded Word Document: {fileName}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDownload}
+                    className="inline-flex items-center gap-1 font-semibold text-[#5935E8] dark:text-[#A58EFF] underline hover:text-[#4926D6]"
+                  >
+                    <Download className="h-3 w-3" />
+                    <span>Download Original .docx</span>
+                  </button>
+                </div>
+              )}
+
               <div className="max-w-3xl mx-auto space-y-4">
                 {content ? (
                   content.split('\n\n').map((paragraph, idx) => {
@@ -210,8 +253,8 @@ export default function TextModal({
         <div className="flex items-center justify-between border-t border-[#E8EAF1] dark:border-[#1E2448] px-4 py-3 sm:px-6 bg-[#F7F8FC]/60 dark:bg-[#0E1226]/60">
           <p className="text-xs text-[#687386] dark:text-[#9AA3B2]">
             {isPdf && fileData
-              ? 'Showing exact uploaded document with original formatting.'
-              : 'Preserving full structural formatting and line breaks.'}
+              ? 'Showing exact uploaded document with original layout and formatting.'
+              : 'Preserving full structural formatting, headings, and line breaks.'}
           </p>
           <button type="button" onClick={onClose} className="btn-secondary text-xs py-1.5 px-4">
             Close

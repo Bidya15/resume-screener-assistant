@@ -161,7 +161,8 @@ public class AnalysisMapper {
                 continue;
             }
             // If separated by separator, take first part
-            String candidate = line.split("[|•–—\\-]")[0].trim();
+            String candidate = line.split("[|•–—\\-]")[0].trim()
+                    .replaceAll("(?i)\\b([a-z]{3,})\\s+([a-z])\\s+([a-z]+)\\b", "$1$2 $3");
             String[] words = candidate.split("\\s+");
             if (words.length >= 2 && words.length <= 4) {
                 boolean allAlpha = true;

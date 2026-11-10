@@ -15,12 +15,20 @@ async function request(fn) {
   }
 }
 
-export function createAnalysis({ candidateName, jobDescription, resume, resumeText }) {
+export function createAnalysis(payload) {
   return request(async () => {
+    const candidateName = payload.candidateName?.trim() || undefined;
+    const jobDescription = (payload.jobDescription || '').trim();
+    const resumeText = (payload.resumeText || payload.resume || '').trim();
+
     const { data } = await api.post(ENDPOINTS.analyses, {
-      candidateName: (candidateName && candidateName.trim()) ? candidateName.trim() : 'Unknown',
-      jobDescription: (jobDescription || '').trim(),
-      resumeText: (resumeText || resume || '').trim(),
+      candidateName,
+      jobDescription,
+      resumeText,
+      resumeFileData: payload.resumeFileData || null,
+      resumeFileName: payload.resumeFileName || null,
+      jobDescriptionFileData: payload.jobDescriptionFileData || null,
+      jobDescriptionFileName: payload.jobDescriptionFileName || null,
     });
     return normalizeAnalysis(data);
   });

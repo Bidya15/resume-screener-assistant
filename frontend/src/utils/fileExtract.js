@@ -83,24 +83,35 @@ export async function extractTextFromFile(file) {
         const content = await page.getTextContent();
         let pageText = '';
         let lastY = null;
+        let lastX = null;
+        let lastWidth = null;
 
         for (const item of content.items) {
           if (!item.str) continue;
+          const x = item.transform ? item.transform[4] : null;
           const y = item.transform ? item.transform[5] : null;
+          const w = item.width || 0;
 
           // When vertical position changes significantly, insert a newline
           if (lastY !== null && y !== null && Math.abs(y - lastY) > 3) {
-            pageText += '\n';
-          } else if (pageText.length > 0 && !pageText.endsWith('\n') && !pageText.endsWith(' ')) {
-            pageText += ' ';
+            if (!pageText.endsWith('\n')) pageText += '\n';
+          } else if (lastX !== null && x !== null && lastWidth !== null) {
+            // Calculate horizontal distance between end of last item and start of this item
+            const gap = x - (lastX + lastWidth);
+            // Only add a space if there is an actual gap between glyphs (> 2.0 pt) and no space exists
+            if (gap > 2.0 && !pageText.endsWith(' ') && !pageText.endsWith('\n') && !item.str.startsWith(' ')) {
+              pageText += ' ';
+            }
           }
 
           pageText += item.str;
 
-          if (item.hasEOL) {
+          if (item.hasEOL && !pageText.endsWith('\n')) {
             pageText += '\n';
           }
           lastY = y;
+          lastX = x;
+          lastWidth = w;
         }
 
         pagesText.push(pageText);
@@ -266,7 +277,13 @@ function looksLikeName(str, headingWords) {
   return true;
 }
 function toTitleCase(str) {
-  return str
+  if (!str) return '';
+  // Heal PDF glyph splits where a word was broken into prefix + single letter (e.g. "Bidy A Sing" -> "Bidya Sing")
+  const healed = str.replace(
+    /\b([A-Za-z]{3,})\s+([a-zA-Z])\s+([A-Z][a-z]+)\b/g,
+    (m, p, s, n) => `${p}${s} ${n}`
+  );
+  return healed
     .split(/\s+/)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(' ');
