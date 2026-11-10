@@ -92,17 +92,9 @@ export default function AnalysisHistory() {
 
   return (
     <div className="space-y-6">
-      {/* Header and Quick Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight text-[#172033] dark:text-white">
-            Candidate Analysis History
-          </h2>
-          <p className="mt-0.5 text-xs text-[#687386] dark:text-[#9AA3B2]">
-            Review, search and manage previously screened candidate profiles.
-          </p>
-        </div>
-        <Link to="/analysis/new" className="btn-primary self-start sm:self-auto text-xs">
+      {/* Quick Action */}
+      <div className="flex items-center justify-end">
+        <Link to="/analysis/new" className="btn-primary text-xs">
           <FilePlus2 className="h-4 w-4" />
           <span>New Analysis</span>
         </Link>

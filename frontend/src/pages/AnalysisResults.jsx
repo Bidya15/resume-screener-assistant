@@ -98,29 +98,14 @@ export default function AnalysisResults() {
 
   return (
     <div className="space-y-6">
-      {/* Top Breadcrumb & Actions Bar */}
+      {/* Top Header & Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
         <div>
-          <div className="flex items-center gap-2 text-xs font-medium text-[#687386] dark:text-[#9AA3B2]">
-            <Link
-              to="/analysis/history"
-              className="hover:text-[#5935E8] flex items-center gap-1 transition-colors"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" /> Candidates
-            </Link>
-            <span>›</span>
-            <span className="text-[#172033] dark:text-white font-semibold">
-              {analysis.candidateName || 'Candidate'}
-            </span>
-            <span>›</span>
-            <span className="text-[#5935E8]">Match Details</span>
-          </div>
-
-          <h2 className="mt-2 text-2xl font-black tracking-tight text-[#172033] dark:text-white">
-            Semantic JD Matching
+          <h2 className="text-2xl font-black tracking-tight text-[#172033] dark:text-white">
+            {analysis.candidateName || 'Candidate Evaluation'}
           </h2>
           <p className="mt-0.5 text-xs text-[#687386] dark:text-[#9AA3B2]">
-            Candidate: <strong className="text-[#172033] dark:text-white">{analysis.candidateName}</strong> • Matched on {formatFullDateTime(analysis.createdAt)} • Match ID: #{analysis.id}
+            Screened for <strong className="text-[#172033] dark:text-white">{analysis.jobTitle || 'Target Role'}</strong> • Evaluated on {formatFullDateTime(analysis.createdAt)} • Match ID: #{analysis.id}
           </p>
         </div>
 

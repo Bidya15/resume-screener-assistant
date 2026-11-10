@@ -35,15 +35,6 @@ export default function NewAnalysis() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold tracking-tight text-[#172033] dark:text-white">
-          New Resume Analysis
-        </h2>
-        <p className="mt-0.5 text-xs text-[#687386] dark:text-[#9AA3B2]">
-          Compare candidate qualifications against job requirements using AI-powered semantic evaluation.
-        </p>
-      </div>
-
       {error && <ErrorMessage title="Analysis failed" message={error.message} />}
 
       <AnalysisForm onSubmit={handleSubmit} submitting={submitting} />

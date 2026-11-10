@@ -40,8 +40,9 @@ export default function Navbar({
     subtitle: '',
   };
 
-  const isDetailsPage = pathname.startsWith('/analysis/') || pathname.startsWith('/analyses/');
   const isNewPage = pathname === '/analysis/new' || pathname === '/analyses/new';
+  const isHistoryPage = pathname === '/analysis/history' || pathname === '/analyses';
+  const isMatchDetailsPage = (pathname.startsWith('/analysis/') || pathname.startsWith('/analyses/')) && !isNewPage && !isHistoryPage;
 
   return (
     <>
@@ -61,7 +62,7 @@ export default function Navbar({
 
             <div>
               {/* Breadcrumbs for Details View */}
-              {isDetailsPage && (
+              {isMatchDetailsPage && (
                 <div className="mb-1 flex items-center gap-1.5 text-xs text-[#687386] dark:text-[#9AA3B2]">
                   <Link
                     to="/analysis/history"

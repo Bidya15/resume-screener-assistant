@@ -26,15 +26,6 @@ export default function Settings() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div>
-        <h2 className="text-xl font-bold tracking-tight text-[#172033] dark:text-white">
-          Settings & Preferences
-        </h2>
-        <p className="mt-0.5 text-xs text-[#687386] dark:text-[#9AA3B2]">
-          Manage recruiter profile details, credentials, notification rules, and platform configuration.
-        </p>
-      </div>
-
       {/* Navigation Tabs */}
       <div className="flex border-b border-[#E8EAF1] dark:border-[#1E2448] overflow-x-auto no-scrollbar gap-1">
         {TABS.map((tab) => {
