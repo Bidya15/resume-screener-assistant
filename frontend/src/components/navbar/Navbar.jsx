@@ -109,7 +109,7 @@ export default function Navbar({
             </button>
 
             {/* Details Page Share Match Button */}
-            {isDetailsPage && (
+            {isMatchDetailsPage && (
               <button
                 type="button"
                 onClick={() => setShareModalOpen(true)}
