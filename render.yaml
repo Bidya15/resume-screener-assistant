@@ -14,7 +14,7 @@ services:
     dockerfilePath: resume-screener-backend/Dockerfile
     dockerContext: resume-screener-backend
     plan: free
-    healthCheckPath: /api/dashboard/stats
+    healthCheckPath: /api/health
     envVars:
       - key: DB_HOST
         fromDatabase:
@@ -44,6 +44,8 @@ services:
         sync: false # Set securely in Render dashboard
       - key: GEMINI_API_KEY
         sync: false # Optional fallback
+      - key: JAVA_OPTS
+        value: "-XX:+UseSerialGC -XX:MaxRAMPercentage=75 -Xss512k"
 
   # -------------------------------------------------------------
   # Frontend: React 18 (Vite) Static Site
@@ -60,8 +62,5 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_BASE_URL
-        fromService:
-          type: web
-          name: resume-screener-backend
-          property: host
+        sync: false # Set to: https://resume-screener-backend.onrender.com in Render dashboard
 
